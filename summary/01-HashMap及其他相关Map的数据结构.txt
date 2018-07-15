@@ -1,0 +1,63 @@
+一：HashMap原理
+
+    1.对key做hash算法，然后将hash值映射到内存地址(数组的下表索引，初始大小是16的Entry数组)
+    2.对于key=null的直接存到table[0]，因为null的hash值总是0。get同理
+    3.key做hash后若对应table下标已有元素，则调用key的equals方法，若相同直接覆盖(key相同)。
+    4.若equals不相同(hash冲突)，则链表存储。
+    5.get时，先调用hash算法得到下标，再迭代链表，根据equas方法获取对应的entry
+    6.hashMap是单向链表
+
+1.为什么hashMap要求数组大小必须是2的N次方？
+  答：因为HashMap将Key的哈希值对数组长度取模，结果作为该Entry在数组中的index。但取模运算的代价远远高于位运算。
+      所以hashMap的做法是将Key的哈希值对2^N-1进行与运算，其效果即与取模等效。
+
+接下来，我们分析下为什么哈希表的容量一定要是2的整数次幂。首先，length为2的整数次幂的话，h&(length-1)就相当于对length取模，这样便保证了散列的均匀，同时也提升了效率；其次，length为2的整数次幂的话，为偶数，这样length-1为奇数，奇数的最后一位是1，这样便保证了h&(length-1)的最后一位可能为0，也可能为1（这取决于h的值），即与后的结果可能为偶数，也可能为奇数，这样便可以保证散列的均匀性，而如果length为奇数的话，很明显length-1为偶数，它的最后一位是0，这样h&(length-1)的最后一位肯定为0，即只能为偶数，这样任何hash值都只会被散列到数组的偶数下标位置上，这便浪费了近一半的空间，因此，length取2的整数次幂，是为了使不同hash值发生碰撞的概率较小，这样就能使元素在哈希表中均匀地散列。
+
+
+二:jdk1.7和1.8实现的区别:
+    1.7为Entry数组，1.8为Node数组
+    当存入hashMap的key的hashCode全部相同时：
+    1.7会存入到同一个数组下标下的链表中，最坏的情况(key的hashcode全部相同)下时间复杂度O(n); 
+
+    1.8：使用一个Node数组来存储数据，但这个Node可能是链表结构，也可能是红黑树结构
+    如果插入的key的hashcode相同，那么这些key也会被定位到Node数组的同一个格子里。
+    如果同一个格子里的key不超过8个，使用链表结构存储。
+    如果超过了8个，那么会调用treeifyBin函数，将链表转换为红黑树。
+    那么即使hashcode完全相同，由于红黑树的特点，查找某个特定元素，也只需要O(log n)的开销
+    也就是说put/get的操作的时间复杂度最差只有O(log n)：前提(key的对象必须正确的实现了Compare接口)否则最坏情况下，效率比1.7还慢
+
+如果key是null，会被存储到table[0]，因为null的hash值总是0。
+length取2的整数次幂，是为了使不同hash值发生碰撞的概率较小，这样就能使元素在哈希表中均匀地散列
+
+
+三.hashMap用在多线程程序中哪些操作会有问题?
+    1:hashMap扩容错误使得hashMap访问出现死循环。
+    https://my.oschina.net/xianggao/blog/393990?fromerr=OPResiVf
+    https://zhuanlan.zhihu.com/p/27392507
+    总结一下就是，会导致put和get时(HashTable.get(*))    出现死循环，原因是hashMap在扩容的时候会导致内部的单向链表变成了环形链表，loop的时候出现了死循环。
+    
+    这个问题在jdk8中已经解决。http://www.importnew.com/20386.html
+    怎么解决的？：这个问题其实在1.7中为什么会导致单链表变环形链表死锁的原因，是因为JDK1.7中rehash的时候，旧链表迁移新链表的时候，如 果在新表的数组索引位置相同，则链表元素会倒置，这样会导致链表指向错误。而1.8则会在原有链表的基础上在后面增加，不会出现循环指向的问题。
+
+    2.触发Fail-Fast机制。抛出ConcurrentModificationException异常。:https://zhuanlan.zhihu.com/p/27392507
+      Fail-Fast机制:在迭代器使用过程中HashMap被修改。
+    
+
+
+
+五.TreeMap和LinkedHashMap
+
+LinkedHashMap 继承自 HashMap，具有高效性，同时在 HashMap 的基础上，又在内部增加了一个链表，用以存放元素的顺序。
+LinkedHashMap 是根据元素增加或者访问的先后顺序进行排序，而 TreeMap 则根据元素的 Key 进行排序(由 Comparator 或者 Comparable 确定)。
+
+总结：LinkedHashMap实现有序key值的关键就是根据插入顺序另外维护了一个按照插入顺序作为标记的双向循环列表，这样在获取所有数据进行循环获取时获取到的数据就是有序的数据。
+
+LinkedHashMap实现原理：
+            LinkedHashMap继承自HashMap，并在内部增加了一个链表，用以存放元素的顺序。通过继承HashMap.Entry类，实现了LinkedHashMap.Entry,为HashMap.Entry增加了before和after属性
+            用来记录某一项的前驱和后驱，这样就构成了一个循环链表。
+
+TreeMap:对于TreeMap来说，排序是必须进行的过程，1.TreeMap构造器传入Comparator。2.使用一个实现了Comparable的key
+
+TreeMap的内部实现是基于红黑树的，时间复杂度O(log n) 
+
+    

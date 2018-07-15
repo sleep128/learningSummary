@@ -1,0 +1,25 @@
+Spring的事务传播属性 或 数据库的事物隔离级别，实现原理.
+
+
+Spring 事务的传播行为
+spring事务的传播行为说的是当一个方法调用另一个方法时，事务该如何操作。 
+    PROPAGATION_MANDATORY：该方法必须运行在一个事务中。如果当前事务不存在则抛出异常。 
+    PROPAGATION_NESTED：如果当前存在一个事务，则该方法运行在一个嵌套的事务中。被嵌套的事务可以从当前事务中单独的提交和回滚。如果当前不存在事务，则开始一个新的事务。各厂商对这种传播行为的支持参差不齐，使用时需注意。 
+    PROPAGATION_NEVER：当前方法不应该运行在一个事务中。如果当前存在一个事务，则抛出异常。 
+    PROPAGATION_NOT_SUPPORTED：当前方法不应该运行在一个事务中。如果一个事务正在运行，它将在该方法的运行期间挂起。 
+    PROPAGATION_REQUIRED：该方法必须运行在一个事务中。如果一个事务正在运行，该方法将运行在这个事务中。否则，就开始一个新的事务。 
+    PROPAGATION_REQUIRES_NEW：该方法必须运行在自己的事务中。它将启动一个新的事务。如果一个现有的事务正在运行，将在这个方法的运行期间挂起。 
+    PROPAGATION_SUPPORTS：当前方法不需要事务处理环境，但如果一个事务已经在运行的话，这个方法也可以在这个事务里运行。
+
+
+
+
+MySQL事务隔离级别:https://www.cnblogs.com/huanongying/p/7021555.html
+
+配置spring事务，需要在配置文件中配置，通过spring的Aop，会执行到AbstractPlatformTransactionManager的getTransaction方法
+如果存在事务，执行handleExistingTransaction
+PROPAGATION_REQUIRED传播机制，会执行doBegin(transaction,definition)方法
+
+spring在底层数据源的基础上，利用 ThreadLocal，SavePoint等技术点实现了多种事务传播属性
+把连接绑定到ThreadLocal变量
+

@@ -1,0 +1,15 @@
+ZooKeeper集群中服务器之间是怎样通信的？
+Leader服务器会和每一个Follower/Observer服务器都建立TCP连接，同时为每个F/O都创建一个叫做LearnerHandler的实体。LearnerHandler主要负责Leader和F/O之间的网络通讯，包括数据同步，请求转发和Proposal提议的投票等。Leader服务器保存了所有F/O的LearnerHandler。
+
+
+zookeeper leader 选举
+
+LeaderElection
+AuthFastLeaderElection
+FastLeaderElection
+默认的算法是FastLeaderElection
+
+节点状态： 每个集群中的节点都有一个状态 LOOKING, FOLLOWING, LEADING, OBSERVING。都属于这4种，每个节点启动的时候都是LOOKING状态，如果这个节点参与选举但最后不是leader，则状态是FOLLOWING，如果不参与选举则是OBSERVING，leader的状态是LEADING。
+
+
+zookeeper防重：

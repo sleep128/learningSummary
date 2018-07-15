@@ -1,0 +1,57 @@
+ MetaQ，Zookeeper 的原理和适用场景：
+
+ MetaQ是一个分布式消息中间件，消息中间件是典型的生产者-消费者模型，核心作用是解耦，生产者和消费者彼此没有直接依赖，同步化解成了异步
+
+MetaQ：从实现角度看，MetaQ充分利用zookeeper这个优秀的服务中心，作为服务注册和查找中心、客户端负载均衡和数据偏移量的分布式存储使用
+
+MetaQ的事务实现跟ActiveMQ是类似的，采用redo日志的方式
+
+
+metaq的消费模型不是生产端推送，而是消费端不停拉取。但是注意，不停拉取不是指消费端定时拉取，而是拉取完一批消息，消费完毕，再去拉取下一批。
+
+
+ZooKeeper是一个分布式的，提供分布式应用程序协调服务。
+
+Zookeeper可以干什么？
+    1.配置管理：应用的一些配置信息
+
+    2.名字服务:域名到IP地址的映射
+
+    3.分布式锁:
+        Leader Election(leader选举):在某个时刻只让一个服务去干活，当这台服务出问题的时候锁释放，立即fail over到另外的服务
+
+    4.集群管理:做消息分发
+
+    比如我们是一个分布式存储系统，有一个中央控制节点负责存储的分配，当有新的存储进来的时候我们要根据现在集群目前的状态来分配存储节点。这个时候我们就需要动态感知到集群目前的状态。还有，比如一个分布式的SOA架构中，服务是一个集群提供的，当消费者访问某个服务时，就需要采用某种机制发现现在有哪些节点可以提供该服务(这也称之为服务发现，比如Alibaba开源的SOA框架Dubbo就采用了Zookeeper作为服务发现的底层机制)。
+
+ZooKeeper集群中服务器之间是怎样通信的？
+Leader服务器会和每一个Follower/Observer服务器都建立TCP连接，同时为每个F/O都创建一个叫做LearnerHandler的实体。LearnerHandler主要负责Leader和F/O之间的网络通讯，包括数据同步，请求转发和Proposal提议的投票等。Leader服务器保存了所有F/O的LearnerHandler。
+
+zookeeper的核心是原子广播，保证各个server间的数据同步，使用zab协议：
+分为:恢复模式和广播模式。
+
+
+ Leader选举:
+
+LeaderElection
+AuthFastLeaderElection
+FastLeaderElection
+默认的算法是FastLeaderElection:
+服务器具有四种状态，分别是LOOKING、FOLLOWING、LEADING、OBSERVING。
+
+　　LOOKING：寻找Leader状态。当服务器处于该状态时，它会认为当前集群中没有Leader，因此需要进入Leader选举状态。
+
+　　FOLLOWING：跟随者状态。表明当前服务器角色是Follower。
+
+　　LEADING：领导者状态。表明当前服务器角色是Leader。
+
+　　OBSERVING：观察者状态。表明当前服务器角色是Observer。
+
+
+
+dubbo:Dubbo是一个分布式服务框架，提供RPC远程服务
+Provider: 暴露服务的服务提供方。
+       Consumer: 调用远程服务的服务消费方。
+       Registry: 服务注册与发现的注册中心。
+       Monitor: 统计服务的调用次调和调用时间的监控中心。
+       Container: 服务运行容器。

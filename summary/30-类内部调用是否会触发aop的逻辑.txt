@@ -1,0 +1,15 @@
+一.类内部调用是否会触发aop的逻辑？
+   不会触发：
+
+原因是内部调用直接指向了目标类而不是代理类！！！！
+因为动态代理是通过生成一个新的类 ，因为AOP拦截的包名和类名很明显和代理类的不一样，所以不做拦截。
+
+解决方案：
+方案一--从beanFactory中获取对象
+        SpringContextUtil.getBean(this.getClass());
+方案二--获取代理对象
+        AopContext.currentProxy()
+
+       @async 注解的实现方式。
+       
+

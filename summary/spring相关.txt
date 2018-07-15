@@ -1,0 +1,10 @@
+spring相关
+
+spring 注解：
+注解实现原理：
+
+springMVC的过程
+
+spring @Async注解(是基于代理模式实现的，所以类内部调用不会触发，注意)
+    spring 为有async注解的bean 生成一个子类，继承原来的bean(代理类)，spring 自己维护了一个队列，等待线程池去调用执行
+    我们可以关注到再配置task的时候，是有参数让我们配置线程池的数量的

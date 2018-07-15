@@ -1,0 +1,12 @@
+NIO：
+1.为所有的原始类型提供buffer支持
+2.字符集编码解码使用Java.nio.charset.Charset
+3.增加Channel通道
+4.提供了基于Selector的异步网络I/O.
+
+
+传统IO是基于流(stream)的，NIO是基于块(block)
+ stream是单向的，channel是双向通道，既可读，也可写。  但不能直接对channel进行读写操作，必须通过buffer才行
+
+ buffer 中有三个重要参数：position(位置),capacity(容量),limit(上限)
+ 

@@ -1,0 +1,82 @@
+1.synchronized关键字
+	synchronized锁的不是代码块，锁的是对象，
+	synchronized(this):锁当前对象
+	synchronize（.class）：锁类对象
+	在静态方法上加synchrionized:锁当前Class类对象
+    synchronize+普通方法：锁当前对象
+
+2.Atomic非阻塞同步锁，
+	原理：CAS算法(Compare-and-swap)：类似于乐观锁，使用版本号来完成对共享数据的操作。
+	Apache下的Amino框架提供了很多线程安全，基于无锁算法的一些数据结构。：LockFreeList（底层链表实现）,LockFreeVector(底层数组实现)
+
+
+3.重入锁ReentrantLock: 分为公平锁(Node队列)和非公平锁
+  lock():获得锁，如果锁被占用，则等待。
+  unLock():释放锁
+  lockInterruptly():获得锁，但优先响应中断
+  tryLock():尝试获取锁，如果成功返回true，失败返回false，跟lock()不同，该方法立刻返回，非阻塞。
+
+  ReentrantLock使用的时候一定要释放锁，否则锁就永远无法释放了。
+
+  使用场景：一些递归操作， 外层函数获得锁之后 ，内层递归函数仍然有获取该锁的代码，不受影响。
+  
+
+
+4.读写锁 LinkedBlockingQueue
+  take()和put()函数分别实现了从队列中取得数据和往队列中增加数据的功能，虽然这两个方法都改变了当前队列，
+  但由于LinkedBlockingQueue是基于链表的，take()和put()分别操作队列的前端和末尾，理论上讲不会出现冲突
+
+  LinkedBlockingQueue内部take(),和put()方法内部实现，采用了重入锁Reentrant实现。
+
+
+
+CAS概念和AQS概念。
+CAS就是非阻塞锁，跟乐观锁一个概念，会根据自己期望的值去不断获取锁
+AQS就是阻塞锁，类似于悲观锁，会根据state属性(锁的状态)，来判断。AQS是谁先来先处理谁，不能乱序
+
+wait和sleep比较：sleep()是Thread类的方法，Wait()属于对象的方法。
+sleep:调用sleep方法后，当前线程进入休眠期，暂停执行，但该线程继续拥有监视资源的所有权。到达休眠时间后线程将继续执行，直到完成
+
+wait:调用wait方法后，该线程放弃监视资源的所有权进入等待状态,等待有其它的线程调用notify()或notifyAll()进入调度状态
+
+
+线程池：减少创建线程和销毁线程的时间
+ 一个线程池包括以下四个基本组成部分： 
+    1、线程池管理器（ThreadPool）：用于创建并管理线程池，包括 创建线程池，销毁线程池，添加新任务； 
+    2、工作线程（PoolWorker）：线程池中线程，在没有任务时处于等待状态，可以循环的执行任务；
+    3、任务接口（Task）：每个任务必须实现的接口，以供工作线程调度任务的执行，它主要规定了任务的入口，任务执行完后的收尾工作，任务的执行状态等； 
+    4、任务队列（taskQueue）：用于存放没有处理的任务。提供一种缓冲机制。 
+
+concurrent包下面的几种线程池:使用Excutor静态方法创建
+Executors.newFixedThreadPool(int nThreads):
+
+Executors.newSingleThreadExecutor():
+      返回一个固定线程数量的线程池，该线程池中的线程数量始终不变。当有新的任务添加进来时，
+      若线程池中有空闲线程，则立即执行，若没有则会暂存到一个任务队列中，待有线程空闲时，便处理任务。
+
+Executors.newCachedThreadPool():
+      返回一个只有一个线程的线程池，同上，按先入先出的顺序执行队列中的任务
+
+Executors.newSingleThreadScheduledExecutor():
+      返回一个可根据实际情况调整线程数量的线程池。线程池的线程数量不确定，若有空闲线程可以复用，
+      则会优先使用可复用的线程。若没有空余线程，又有新的任务提交，则会创建新的线程处理任务。
+      所有
+
+
+Executors.newScheduledThreadPool():延迟或定期执行任务。
+
+线程池中submit(),与execute()方法的区别。
+execute()开启线程池的任务调度。没有返回值
+submit()调度的同时返回一个future对象，可以用这个对象去判断执行的结果。前提是只有实现了callable接口才有返回值。
+
+
+
+
+
+
+
+
+
+
+
+

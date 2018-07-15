@@ -1,0 +1,4 @@
+ 19.SQL怎么判断字段是否为空
+ 答：看字段类型 通用is null
+
+ select * from table where column is null or trim(column)=''

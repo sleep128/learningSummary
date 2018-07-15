@@ -1,0 +1,20 @@
+《深入分析Java Web》P264-p285
+
+一。概念
+	cookie:当用户通过http访问一个服务器时，服务器会将一些key/value键值对返回给客户端浏览器。并给这些数据加上一些条件，在条件符合时这个用户下次访问
+		   服务器时再将这些数据完整的返回给服务器，服务器再去判断这些数据。
+
+	session:因为当cookie数据很多时，就增加了客户端与服务端的数据传输量。使用session,不用每次传回所有cookie，而只要传回一个ID，这个ID是客户端第一次访问服务器
+			时生成的，并把相关信息存储在服务端。客户端只需传回这个ID，客户端就能根据ID找到之前存储的session信息。这个ID通常是NAME为JSESIONID的一个cookie。
+
+
+二。session如何工作
+	1.有了sessionID,服务端就可以创建HttpSession对象了
+	  第一次触发通过request.getSession()方法。如果当前session id 没有对应的HttpSession对象，那么就创建一个新的，并将这个对象加到org.apacha.catalina.Manager的session容器中。
+	  Manager管理所有session的生命周期，session过期将被回收，服务器关闭，Session将被序列化到磁盘。
+
+	2.session过期：
+	   Tomcat中session的有效时间为60s(maxInactiveInterval属性控制)，超过这个时间session就会过期。配置：<Manager pathname="" maxInactiveInterval="60" />
+	   检查sesion是否过期是由tomcat一个后台线程backgroundProcess()方法完成。
+	 注意：即使一个session过期，request.getSession依然会有返回，因为里面会创建一个新的StandardSession对象，但里面的指会丢失。
+	 		所以，如果获取到session后，但通过session.getAttribute取不到前面设置的session值，则说明session已经失效。

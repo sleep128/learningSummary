@@ -1,0 +1,72 @@
+concurrentHashMap相关
+
+
+相对于HashTable  整个加锁的形式，采用了分段加锁的方式，只有hash值在同一个段中的数据才会发生竞争
+
+1.分段锁segement 类似于hashMap的Entry数组，数组的每一个元素又是一个链表。segement继承了ReentrantLock
+    ConcurrentHashMap中的hashEntry不同于hashMap的Entry的是，HashEntry中的key和value以及next都被volatile修饰
+
+Segment[]-->HashEntry[]
+
+参数：
+     initialCapacity :默认16,初始化总的线性链的个数，平均分配到每个segment当中
+     loadFactor :默认0.75,进行扩容的阀值因子
+     concurrencyLevel :默认16，并发度，也就是Segment数组的大小 
+
+1.get方法无需加锁，HashEntry中value用volatile修饰，volatile可以保证内存可见性，key 和hash用final 修饰，防止链表结构被破坏.
+	那么ConcurrentHashMap的get操作是如何做到不加锁的呢？原因是它的get方法里将要使用的共享变量都定义成volatile，如用于统计当前Segement大小的count字段和用于存储值的HashEntry的value。定义成volatile的变量，能够在线程之间保持可见性，能够被多线程同时读，并且保证不会读到过期的值
+
+2.Segment中的put方法是要加锁的。只不过是锁粒度细了而已。
+
+3.concurrentHashMap减少锁颗粒度虽然可以让插入操作有较高的效率，但对于一些全局操作，比如调用size()方法时，还是要去获取全局锁。
+但concurrentHashMap对于size()的操作回先尝试用2次非安全的方式统计各个segment大小，如果统计过程中容器的count值发生了变化，那么再采用加锁的方式来统计所有segment大小
+
+那么ConcurrentHashMap是如何判断在统计的时候容器是否发生了变化呢？使用modCount变量，在put , remove和clean方法里操作元素前都会将变量modCount进行加1，那么在统计size前后比较modCount是否发生变化，从而得知容器的大小是否发生变化。
+
+
+concurrentHashMap1.7和1.8的区别：https://www.cnblogs.com/study-everyday/p/6430462.html
+
+1. 1.8的实例化实际上实在put的时候才做的，懒加载
+2. 放弃分段锁的实现方式，采用cas的方式插入
+
+
+统计size()大小的区别：
+1.7：
+	第一种方案他会使用不加锁的模式去尝试多次计算ConcurrentHashMap的size，最多三次，比较前后两次计算的结果，结果一致就认为当前没有元素加入，计算的结果是准确的
+
+	第二种方案是如果第一种方案不符合，他就会给每个Segment加上锁，然后计算ConcurrentHashMap的size返回
+
+1.8：
+
+总结：
+1.JDK1.8的实现降低锁的粒度，JDK1.7版本锁的粒度是基于Segment的，包含多个HashEntry，而JDK1.8锁的粒度就是HashEntry（首节点）
+
+2.JDK1.8版本的数据结构变得更加简单，使得操作也更加清晰流畅，因为已经使用synchronized来进行同步，所以不需要分段锁的概念，也就不需要Segment这种数据结构了，由于粒度的降低，实现的复杂度也增加了
+
+3.JDK1.8使用红黑树来优化链表，基于长度很长的链表的遍历是一个很漫长的过程，而红黑树的遍历效率是很快的，代替一定阈值的链表，这样形成一个最佳拍档
+
+4.JDK1.8为什么使用内置锁synchronized来代替重入锁ReentrantLock，我觉得有以下几点
+	1。因为粒度降低了，在相对而言的低粒度加锁方式，synchronized并不比ReentrantLock差，在粗粒度加锁中ReentrantLock可能通过Con  dition来控制各个低粒度的边界，更加的灵活，而在低粒度中，Condition的优势就没有了
+	2。JVM的开发团队从来都没有放弃synchronized，而且基于JVM的synchronized优化空间更大，使用内嵌的关键字比使用API更加自然
+      在大量的数据操作下，对于JVM的内存压力，基于API的ReentrantLock会开销更多的内存，虽然不是瓶颈，但是也是一个选择依据
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

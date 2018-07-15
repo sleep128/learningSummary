@@ -1,0 +1,25 @@
+设计模式
+一.动态代理：spring动态代理:jdk动态代理(针对接口)，cglib动态代理(针对实现被代理对象)
+
+二.装饰者模式:
+	1.装饰者与被装饰对象实现同一接口；装饰者类中保存一个被装饰者的成员变量，通过构造器传入被装饰者
+	2.在java中BufferedInputStream，装饰InputStream
+
+三.适配器模式:
+    1.适配器实现目标对象的接口，适配器内部有一个被适配的成员变量，适配器中的方法调用被适配成员变量的方法，并修改调用前后逻辑。
+    2.在java中InputStreamReader和OutPutStreamWriter就是一个适配器，传入被适配对象InputStream和OutPutStream，适配成目标接口Reader和Writer
+
+装饰者模式和适配器模式的区别：
+	1.意义不同，适配器的目的是为了改变接口来达到重复使用的目的
+	  而装饰者模式不是改变被装饰对象的接口，是要保持原有的接口。
+
+四.原型模式：克隆，clone方法在Object类中，该方法被protect修饰，我们无法直接调用，只能实现Cloneable接口，重写clone方法
+
+
+五：工厂模式(三种)
+	
+
+
+六：策略模式与状态模式的区别
+	
+	策略模式:http://blog.csdn.net/u012124438/article/details/70039943

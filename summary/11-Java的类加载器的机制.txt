@@ -1,0 +1,18 @@
+一.java类加载机制:
+
+    1.启动类加载器(BootstrapClassLoader):主要加载JVM自身工作需要的类，负责加载$JAVA_HOME中jre/lib/rt.jar里所有的class，由C++实现，不是ClassLoader子类
+
+    2.扩展类加载器(ExtensionClassLoader):负责加载java平台中扩展功能的一些jar包，包括$JAVA_HOME中jre/lib/*.jar或-Djava.ext.dirs指定目录下的jar包,ExtClassLoader的实现
+
+    3.系统类加载器(AppClassLoader)它负责将系统类路径java -classpath或-Djava.class.path变量所指的目录下的类库加载到内存中
+
+    4.应用程序自定义(Custom ClassLoader)自己实现ClassLoader。
+
+二.类加载器的双亲委派模型:
+
+    工作原理是:
+        如果一个类加载器收到了类加载的请求,它不会自己去尝试加载这个类,而是把这个请求委派给父类加载器去完成,这样层层递进,最终所有的加载请求都被传到最顶层的启动类加载器中,只有当父类加载器无法完成这个加载请求(它的搜索范围内没有找到所需的类)时,才会交给子类加载器去尝试加载.
+    用处：防止类被篡改。
+
+三.类加载过程
+    

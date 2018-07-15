@@ -1,0 +1,33 @@
+Tomcat 内存溢出对应解决方式：
+	
+    OutOfMemoryError： Java heap space  堆内存溢出
+    OutOfMemoryError： PermGen space  永久保存区域溢出
+    OutOfMemoryError： unable to create new native thread.无法创建新的线程
+
+　　Tomcat内存溢出解决方案
+
+　　对于前两种情况，在应用本身没有内存泄露的情况下可以用设置tomcat jvm参数来解决。（-Xms -Xmx -XX：PermSize -XX：MaxPermSize）
+
+　　最后一种可能需要调整操作系统和tomcat jvm参数同时调整才能达到目的。
+
+
+Tomcat启动行参数的优化
+	Linux操作系统是catalina.sh文件
+	Windows操作系统是catalina.bat文件
+
+	-server  tomcat默认是以一种叫java –client的模式来运行的，server即意味着你的tomcat是以真实的production的模式在运行的，这也就意味着你的tomcat以server模式运行时将拥有：更大、更高的并发处理能力，更快更强捷的JVM垃圾回收机制，可以获得更多的负载与吞吐量
+
+	 -Xms–Xmx JVM内存设置了
+
+
+那我们看看Nginx是如何实现负载均衡的，Nginx的upstream目前支持以下几种方式的分配
+1、轮询（默认）
+每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down掉，能自动剔除。
+2、weight
+指定轮询几率，weight和访问比率成正比，用于后端服务器性能不均的情况。
+2、ip_hash
+每个请求按访问ip的hash结果分配，这样每个访客固定访问一个后端服务器，可以解决session的问题。
+3、fair（第三方）
+按后端服务器的响应时间来分配请求，响应时间短的优先分配。
+4、url_hash（第三方）
+按访问url的hash结果来分配请求，使每个url定向到同一个后端服务器，后端服务器为缓存时比较有效。

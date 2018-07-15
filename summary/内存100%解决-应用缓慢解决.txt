@@ -1,0 +1,48 @@
+一.cpu100%如何排查？
+    1.使用top命令，查找占用CPU高的Java进程
+    2.通过ps aux | grep PID命令，可以进一步确定是tomcat进程出现了问题
+    3.显示线程列表:ps -mp pid -o THREAD,tid,time,找到耗时最高的线程，将需要的线程ID转换为16进制格式：printf "%x\n" tid
+    4.最后打印线程的堆栈信息：jstack pid |grep tid -A 30，找到问题代码。
+
+最后，总结下排查CPU故障的方法和技巧有哪些：
+1、top命令：Linux命令。可以查看实时的CPU使用情况。可以看到系统中各个进程的资源占用情况。
+
+2、PS命令：Linux命令。强大的进程状态监控命令。可以查看进程以及进程中线程的当前CPU使用情况。属于当前状态的采样数据。
+
+3、jstack：Java提供的命令。可以查看某个进程的当前线程栈运行情况。根据这个命令的输出可以定位某个进程的所有线程的当前运行状态、运行代码，以及是否死锁等等。
+
+4、pstack：Linux命令。可以查看某个进程的当前线程栈运行情况。
+
+
+二.应用缓慢解决：
+        1，查看部署应用系统的系统资源使用情况，CPU,内存，IO这几个方面去看。找到对就的进程。
+        2，使用jstack,jmap等命令查看是JVM是在在什么类型的内存空间中做GC（内存回收），和查看GC日志查看是那段代码在占用内存。
+         首先，调节内存的参数设置，如果还是一样的问题，就要定位到相应的代码。
+        3，定位代码，修改代码（一般是代码的逻辑问题，或者代码获取的数据量过大。）
+
+可以用MAT工具：java堆内存分析器，可以查看内存泄漏和存消耗情况
+
+jmap 用来生成java应用程序的堆快照和对象统计信息
+jstack 用于导出java应用程序的线程堆栈
+
+三.接口性能测试：
+    Jmeter，apacheBench
+
+
+四。-dump命令，
+
+内存dump】
+jmap –dump:live,format=b,file=heap.bin <pid>
+参考资料：http://docs.oracle.com/javase/6/docs/technotes/tools/share/jmap.html
+将生成的heap.bin文件，使用ha456.jar工具打开分析。java -jar -Xmx3000m ha456.jar
+
+使用jdk安装目录下lib文件夹里的jvisualvm 工具来分析dump下来的文件
+
+
+线程dump】
+jstack -m <pid> >jvm_deadlocks.txt
+jstack -l <pid> >jvm_listlocks.txt
+参考资料http://docs.oracle.com/javase/6/docs/technotes/tools/share/jstack.html
+使用top -H -p <pid>找出某进程中要分析的线程ID，然后将线程ID转换为16进制后，在线程dump文件中搜索相关信息
+
+		

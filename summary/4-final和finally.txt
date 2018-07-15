@@ -1,0 +1,57 @@
+一.final
+	Final可以用于成员变量（包括方法参数），方法、类
+
+	1.final成员：
+	作为成员：变量一旦被初始化便不可改变（对于基本类型，指的是值不变；对于对象类型，指的是引用不变），初始化只可能在两个地方：定义处和构造函数。
+	作为方法参数：对于基本类型，定义成final参数没有什么意义，因为基本类型就是传值，不会影响调用语句中的变量；对于对象类型，在方法中如果参数确认不需要改变时，定义成final参数可以防止方法中无意的修改而影响到调用方法。
+
+	2.final方法:
+	不可覆写
+	编译器将对此方法的调用转化成行内（inline）调用，即直接把方法主体插入到调用处（方法主体内容过多的时候反而会影响效率
+
+	3.final类：不可继承
+
+
+二.finally
+	异常处理关键字，finally中的主体总会执行，不管异常发生是否。
+	*return语句并不是函数的最终出口，如果有finally语句，这在return之后还会执行finally（return的值会暂存在栈里面，等待finally执行后再返回）
+	    private static int method1(){   //返回30
+        int num =10;
+        try {
+            return num+=20;
+        } finally {
+            num++;
+        }
+    }
+
+    private static int method3(){	//返回60
+        int num =10;
+        try {
+            num += 20;
+            return num;
+        } finally {
+            num += 30;
+            return num;
+        }
+    }
+
+    private static Student method3(){	//返回s1.getAge()=30
+        Student s1 = new Student();
+        s1.setAge(10);
+        try {
+            s1.setAge(20);
+            return s1;
+        } finally {
+            s1.setAge(30);
+        }
+    }
+try语句在返回前，将其他所有的操作执行完，保留好要返回的值，而后转入执行finally中的语句，而后分为以下三种情况：
+情况一：如果finally中有return语句，则会将try中的return语句”覆盖“掉，直接执行finally中的return语句，得到返回值，这样便无法得到try之前保留好的返回值。
+情况二：如果finally中没有return语句，也没有改变要返回值，则执行完finally中的语句后，会接着执行try中的return语句，返回之前保留的值。
+情况三：如果finally中没有return语句，但是改变了要返回的值，这里有点类似与引用传递和值传递的区别，分以下两种情况：
+如果return的数据是基本数据类型，则在finally中对该基本数据的改变不起作用，try中的return语句依然会返回进入finally块之前保留的值。
+如果return的数据是引用数据类型，而在finally中对该引用数据类型的属性值的改变起作用，try中的return语句返回的就是在finally中改变后的该属性的值。
+
+三.finalize
+
+类的Finalize方法，可以告诉垃圾回收器应该执行的操作，该方法从Object类继承而来。在从堆中永久删除对象之前，垃圾回收器调用该对象的Finalize方法。注意，无法确切地保证垃圾回收器何时调用该方法，也无法保证调用不同对象的方法的顺序。即使一个对象包含另一个对象的引用，或者在释放一个对象很久以前就释放了另一个对象，也可能会以任意的顺序调用这两个对象的Finalize方法。如果必须保证采用特定的顺序，则必须提供自己的特有清理方法。

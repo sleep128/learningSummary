@@ -1,0 +1,12 @@
+1.ThreadLocal,维护线程的局部变量副本
+其实是一种以空间换时间的手段
+
+实现原理：
+ThreadLocal 中维护了一个ThreadLocalMap映射表，这个映射表储存的key就是ThreadLocal本身(线程id)，value则是我们存储的局部变量object
+
+每个线程Thread都会维护自己的ThreadLocalMap，这个map的key则是ThreadLocal类本身，而value则是我们保存的数据。ThreadLocal在多线程中是被公共持有的，被隔离的数据实际是存放在每个线程的ThreadLocalMap中的，只不过是通过ThreadLocal的引用得到每个线程维护的ThreadLocalMap中的value。
+
+
+Spring 中ThreadLocal的应用：
+    spring中使用ThreadLocal来设计TransactionSynchronizationManager类，实现了事务管理与数据访问服务的解耦，同时也保证了多线程环境下connection的线程安全问题。
+    把Connection 绑定到Thread

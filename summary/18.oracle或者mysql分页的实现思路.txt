@@ -1,0 +1,37 @@
+18.oracle或者mysql分页的实现思路
+mysql :limit start,count  start从0开始
+
+这种方式在数据量比较大时会让limit的效率变得很慢，
+优化方案 ：根据主键排序，并记录上次最后一条id，sql 写成：where id > last_id limit 0 , count;
+
+
+oracle:
+
+oracle 实现分页是使用伪列ROWNUM(注意：rownum是从1开始的)
+标准写法：
+SELECT t2.*
+	FROM
+	(
+		SELECT
+			t1.*, rownum rn
+		FROM
+	   (
+		   SELECT *
+			   FROM tb_courseinfo
+		   ) t1
+	  WHERE rownum <= 150
+	) t2
+WHERE rn > 100
+
+
+性能最好的写法：(rownum <= 100 是固定的)：
+
+SELECT t1.*
+	FROM
+	(
+		SELECT *
+			FROM tb_courseinfo
+		WHERE id > #maxId#
+		ORDER BY id
+		) t1
+WHERE rownum <= 100

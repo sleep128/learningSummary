@@ -1,0 +1,9 @@
+tomcat部署javaWeb应用
+1.先使用jar命令把javaWeb应用打包成一个war包：-jar -cvf JavaWebProject.war JavaWebProject
+2.使用rz 命令传输war包至tomcat的webapps目录下（rz：运行该命令会弹出一个文件选择窗口，从本地选择文件上传到Linux服务器）
+3.服务端口配置：conf文件夹下：server.xml中配置Connector节点。
+4.启动tomcat:进入bin文件夹，运行startup.sh sh startup.sh 或 ./startup.sh
+
+tomcat虚拟路径：http://blog.csdn.net/readiay/article/details/45370349
+1.修改server.xml文件，增加配置。
+<Context path="/yang" docBase="f:\mysite1\xxx.war" debug="0" reloadable="true" crossContext="true" />

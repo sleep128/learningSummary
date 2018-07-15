@@ -1,0 +1,15 @@
+分布式集群
+zookeeper:集群：
+	ZooKeeper集群通常采用2n+1台server组成，每台server都会维护内存状态镜像及持久化存储的事务日志和快照，对于2n+1台server,只要有n+1台可用，整个集群就保持可用。
+
+	系统启动或者ledader崩溃时会进行leader选举，一台server作为leader,其他作为follower。
+	由follower来响应客户端请求，对于不改变系统一致性的操作，由follower的本地内存数据库直接返回给客户端。
+	对于会改变系统一致性的请求，则交由leader进行提议投票，超过半数通过后返回给客户端
+
+	leader选举默认算法(FastLeaderElection),
+
+	ZooKeeper集群中服务器之间是怎样通信的？
+		Leader服务器会和每一个Follower/Observer服务器都建立TCP连接，同时为每个F/O都创建一个叫做LearnerHandler的实体。LearnerHandler主要负责Leader和F/O之间的网络通讯，包括数据同步，请求转发和Proposal提议的投票等。Leader服务器保存了所有F/O的LearnerHandler。
+
+	zookeeper集群各个server之间的数据同步，使用zab协议。
+	zab协议分为恢复模式和广播模式，恢复模式就是重新选取leader。广播模式：
